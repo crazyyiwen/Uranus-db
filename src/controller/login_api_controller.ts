@@ -1,30 +1,54 @@
 import {Request, Response} from 'express';
 import bcrypt from 'bcrypt';
 import app from '../app'
+import { v4 as uuidv4 } from 'uuid';
 
 export const login = async (req: Request, res: Response): Promise<void> => {
-    // Placeholder for login logic
     try{
+        const { username, password } = req.body;
+
+        // Validate input
+        if (!username || !password) {
+            res.status(400).json({
+                message: 'Bad Request',
+                error: 'Username and password are required'
+            });
+            return;
+        }
+
         let client_db = app.get_db_client();
         let db = client_db.db('userinfo');
         let collection = db.collection('login');
 
-        const { user_login_details } = req.body;
+        // Find user by username
+        const user = await collection.findOne({ username });
 
-        const user = await collection.findOne({ username: user_login_details.username, password: user_login_details.password });
-        if(user){
+        if (!user) {
+            res.status(401).json({
+                message: 'Invalid credentials'
+            });
+            return;
+        }
+
+        // Compare password with hashed password
+        const isPasswordValid = await bcrypt.compare(password.toString(), user.password);
+
+        if (isPasswordValid) {
+            // Remove password from response
+            const { password: _, ...userWithoutPassword } = user;
+
             res.status(200).json({
                 message: 'Login successful',
-                user: user
+                user: userWithoutPassword
             });
-        }
-        else{
+        } else {
             res.status(401).json({
                 message: 'Invalid credentials'
             });
         }
     }
     catch(error: any){
+        console.error('Login error:', error);
         res.status(500).json({
             message: 'Internal Server Error',
             error: error.message
@@ -83,7 +107,7 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
 
         // Hash password
         const saltRounds = 10;
-        const hashedPassword = await bcrypt.hash(password, saltRounds);
+        const hashedPassword = await bcrypt.hash(password.toString(), saltRounds);
 
         // Create new user
         const newUser = {
@@ -91,7 +115,8 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
             email,
             password: hashedPassword,
             createdAt: new Date(),
-            updatedAt: new Date()
+            updatedAt: new Date(),
+            userId: uuidv4()
         };
 
         const result = await collection.insertOne(newUser);
