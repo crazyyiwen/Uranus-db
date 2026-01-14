@@ -19,8 +19,9 @@ class Application{
             if(!this.db || !this.app){
                 throw new Error('Application not properly initialized');
             }
-            this.initialize();
-            this.server = this.app.listen(process.env.PORT || 3000, () => {
+            await this.initialize();
+            await this.register_middleware();
+            this.server = this.app.listen(env.port|| 3000, () => {
                 console.log(`Server is running on port ${process.env.PORT || 3000}`);
             });
             return this.server;
@@ -41,6 +42,10 @@ class Application{
         catch(error){
             throw error;
         }
+    }
+
+    async register_middleware(): Promise<void>{
+        // Placeholder for middleware registration logic
     }
 
     get_db_client(): MongoClient{
