@@ -3,6 +3,7 @@ import { MongoClient} from 'mongodb';
 import { Application as ExpressApplication } from 'express';
 import { DBConnection } from './middlewares/db_connection';
 import { loadExpressServer } from './middlewares/load_express_server';
+import env from './core/constant';
 
 class Application{
     private app: ExpressApplication | null;
@@ -22,11 +23,12 @@ class Application{
             await this.initialize();
             await this.register_middleware();
             this.server = this.app.listen(env.port|| 3000, () => {
-                console.log(`Server is running on port ${process.env.PORT || 3000}`);
+                console.log(`Server is running on port ${env.port || 3000}`);
             });
             return this.server;
         }
         catch(error){
+            console.error('Error starting application:', error);
             throw error;
         }
     }
@@ -40,6 +42,7 @@ class Application{
             console.log('Database connected successfully');
         }
         catch(error){
+            console.error('Error initializing database:', error);
             throw error;
         }
     }

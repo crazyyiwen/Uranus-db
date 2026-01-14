@@ -1,5 +1,6 @@
 import cors, {CorsOptions} from 'cors';
 import { RequestHandler } from 'express';
+import env from '../core/constant';
 
 const corsOptions: CorsOptions = {
     origin:  function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
