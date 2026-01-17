@@ -1,13 +1,13 @@
 import { EventEmitter } from 'events';
 import * as _ from 'lodash';
-import { generateUid } from '../utils/generators';
+import { generateUid } from '../../utils/generators';
 import {
   Segments,
   IStoreChange,
   IStorePatch,
   StoreAction,
   StoreChangeListener
-} from '../types/store.types';
+} from '../../types/store.types';
 
 /**
  * Data Model Manager Service
